@@ -172,7 +172,7 @@ elif args.mode == 'demo':
                     print('PER: {}\nLOC: {}\nORG: {}\nMON: {}\n'.format(PER, LOC, ORG, MON))
 
                     # 将数据写入es
-                    es.index(index='zhizhuxia_hainan', doc_type='ner_type',
+                    es.index(index='zhizhuxia_jiangsu', doc_type='ner_type',
                              body={'addr': addr,
                                    'charge': charge,
                                    'judgementId': judgementId,

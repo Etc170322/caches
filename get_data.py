@@ -17,7 +17,7 @@ from pymongo import MongoClient
 
 
 # 从数据库获取数据  mongo
-# uri = 'mongodb://' + 'root' + ':' + '123456' + '@' + 'test.npacn.com' + ':' + '8017' +'/'+ 'itslaw'
+uri = 'mongodb://' + 'root' + ':' + '123456' + '@' + 'test.npacn.com' + ':' + '8017' +'/'+ 'itslaw'
 #uri = 'mongodb://' + ' ' + ':' + ' ' + '@' + 'test.npacn.com' + ':' + '20000' +'/'+ 'testdb'
 uri = 'mongodb://' + 'root' + ':' + '123456' + '@' + 'test.npacn.com' + ':' + '20000' +'/'+ 'itslaw'
 client = MongoClient(uri)
@@ -29,10 +29,10 @@ def get_MONGO_data():
     datas = []
     try:
         db = client.itslaw      # 连接所需要的数据库
-        collection = db.hainan    # collection名
+        collection = db.jiangsu    # collection名
         print('Connect Successfully')
         # 查询数据
-        data_result = collection.find().limit(100000)
+        data_result = collection.find().limit(150000)
         for item in data_result:
             result = {'judge_text':'',
                       'addr':'',
@@ -106,7 +106,7 @@ def del_MONGO_data(judgementId):
     '''
     try:
         db = client.itslaw  # 连接所需要的数据库
-        collection = db.hainan  # collection名
+        collection = db.jiangsu  # collection名
         collection.delete_one({"judgementId": judgementId})
     except Exception as e:
         print("Error is ", e)
