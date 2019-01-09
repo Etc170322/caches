@@ -25,9 +25,12 @@ from get_data import get_MONGO_data, del_MONGO_data
 
 
 
-config = tf.ConfigProto()
-# config.gpu_options.allow_growth = True
-config.gpu_options.per_process_gpu_memory_fraction = 0.5
+config=None
+# 数据库操作
+# db = pymysql.Connect("localhost", "root", "Aa123456", "zhizhuxia")
+# print('Connect successful')
+# cursor = db.cursor()
+# redis = redis.Redis(host='127.0.0.1', port=6379)
 
 # 连接ES
 es = Elasticsearch(
@@ -147,32 +150,28 @@ elif args.mode == 'demo':
             # print('Please input your sentence:')
             # demo_sent = input()
 
-        all_texts = get_MONGO_data()
+        # all_texts = get_MONGO_data()
         try:
-            for i, one_text in enumerate(all_texts):
-                # mongodb的数据格式
+            for one_text in get_MONGO_data():
                 addr = one_text['addr']  # 归属地
                 charge = one_text['charge'] # 犯罪原因
                 judgementId = one_text['judgementId'] # 判决Id，唯一标示
+                print(judgementId)
                 keywords = one_text['keywords']      # 关键词
                 court = one_text['court']           # 法院信息
-                judge_text = one_text['judge_text']  # 判决结果，是一个列表，继续循环
+                text = one_text['judge_text']  # 判决结果，是一个列表，继续循环
                 proponents = one_text['proponents']   # 原告
                 opponents = one_text['opponents']     # 被告
 
-                for text in judge_text:     # 处理判决结果
-                    text = re.sub("<a.+?</a>",'', text)
-                    if text is '':
-                        continue
-                    print('judge_text: ', text)
+                if text:
                     demo_data = [(text, ['O'] * len(text))]
                     tag = model.demo_one(sess, demo_data)
-                    PER, LOC, ORG = get_entity(tag, text)
+                    PER, LOC, ORG= get_entity(tag, text)
                     MON = get_MON_entity(text)
                     print('PER: {}\nLOC: {}\nORG: {}\nMON: {}\n'.format(PER, LOC, ORG, MON))
 
                     # 将数据写入es
-                    es.index(index='zhizhuxia_jiangsu', doc_type='ner_type',
+                    es.index(index='zhizhuxia_hunan', doc_type='ner_type',
                              body={'addr': addr,
                                    'charge': charge,
                                    'judgementId': judgementId,
@@ -187,9 +186,10 @@ elif args.mode == 'demo':
                                    'opponents': opponents,
                                    'timestamp': datetime.now()})
 
-                # 根据judgement_id删除数据
-                del_ = del_MONGO_data(judgementId)
-                print('Del succeed')
-
+                    # 根据judgement_id删除数据
+                    del_MONGO_data(judgementId)
+                    print('Del succeed')
+                   
+                    # 调用关系抽取
         except Exception as e:
-            print('Error is', e)
+            print('Info Error is', e)
